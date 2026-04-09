@@ -148,8 +148,8 @@ const WallCalendar = () => {
         }
       `}</style>
 
-      {/* DASHBOARD - Strictly max-w-3xl (768px) to prevent being "too wide" */}
-      <div className="w-full max-w-3xl flex justify-between items-center mb-3 sm:mb-4 px-1 sm:px-2 z-50">
+      {/* DASHBOARD */}
+      <div className="w-full max-w-3xl flex justify-between items-center mb-3 sm:mb-4 px-2 sm:px-2 z-50">
         <div>
           <h2 className="text-stone-500 font-black tracking-[0.2em] text-[10px] sm:text-xs">SMART STACK CALENDAR</h2>
           <p className="text-stone-400 text-[8px] sm:text-[9px] tracking-widest uppercase mt-0.5">Interactive Engine</p>
@@ -164,7 +164,7 @@ const WallCalendar = () => {
         </button>
       </div>
 
-      {/* 3D WRAPPER - Strictly max-w-3xl */}
+      {/* 3D WRAPPER */}
       <div 
         className={`w-full max-w-3xl relative ${isWindy ? 'wind-active' : ''}`} 
         style={{ perspective: '2000px', transformStyle: 'preserve-3d', transformOrigin: 'top center' }}
@@ -189,26 +189,26 @@ const WallCalendar = () => {
               className="col-start-1 row-start-1 w-full bg-[#fdfbf7] rounded-xl sm:rounded-2xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.25)] overflow-hidden flex flex-col border border-stone-200 cursor-grab active:cursor-grabbing"
             >
               
-              {/* Wire Binding - Scaled down for 3xl width */}
+              {/* Wire Binding */}
               <div className="relative h-4 sm:h-5 bg-zinc-900 flex justify-around items-center px-4 sm:px-8 z-20 shrink-0 pointer-events-none">
                 {[...Array(14)].map((_, i) => (
                   <div key={i} className="w-1 sm:w-1.5 h-6 sm:h-8 bg-gradient-to-b from-zinc-300 to-zinc-600 rounded-full border border-black shadow-inner -mt-2 sm:-mt-3" />
                 ))}
               </div>
 
-              {/* TOP: Image Banner - Perfect proportionate height (sm:h-40) */}
+              {/* TOP: Image Banner */}
               <div className="relative w-full h-32 sm:h-40 bg-zinc-100 shrink-0 pointer-events-none">
                 <img src={images[month]} alt={monthName} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-5 text-white">
                   <span className="text-[10px] sm:text-xs font-medium tracking-[0.4em] opacity-80 mb-0.5">{year}</span>
-                  <h1 className="text-3xl sm:text-4xl font-black tracking-tighter">{monthName}</h1>
+                  <h1 className="text-2xl sm:text-4xl font-black tracking-tighter">{monthName}</h1>
                 </div>
               </div>
 
-              {/* MIDDLE: Content - Balanced 60/40 Split */}
+              {/* MIDDLE: Content (Stacks perfectly on mobile) */}
               <div className="flex flex-col md:flex-row p-3 sm:p-5 gap-4 sm:gap-6 bg-white border-b border-stone-100 flex-1 cursor-auto" onPointerDown={(e) => e.stopPropagation()}>
                 
-                {/* LEFT: Calendar Grid (Takes 60% of width) */}
+                {/* LEFT: Calendar Grid */}
                 <div className="w-full md:w-[58%] flex flex-col">
                   
                   {/* Grid Controls */}
@@ -218,7 +218,7 @@ const WallCalendar = () => {
                       {startDate && !endDate && (
                         <button 
                           onClick={toggleMarkDate} 
-                          className="text-[8px] sm:text-[9px] font-bold text-sky-500 hover:text-sky-700 uppercase tracking-widest bg-sky-50 px-2 sm:px-2.5 py-1 rounded-full flex items-center gap-1"
+                          className="text-[9px] sm:text-[10px] font-bold text-sky-500 hover:text-sky-700 uppercase tracking-widest bg-sky-50 px-2 sm:px-2.5 py-1 rounded-full flex items-center gap-1"
                         >
                           {markedDates[startDate.getTime()] ? '★ UNMARK' : '☆ MARK'}
                         </button>
@@ -226,7 +226,7 @@ const WallCalendar = () => {
                       {startDate && (
                         <button 
                           onClick={() => { triggerHaptic(20); setStartDate(null); setEndDate(null); setHoverDate(null); }} 
-                          className="text-[8px] sm:text-[9px] font-bold text-red-500 hover:text-red-700 uppercase tracking-widest bg-red-50 px-2 sm:px-2.5 py-1 rounded-full"
+                          className="text-[9px] sm:text-[10px] font-bold text-red-500 hover:text-red-700 uppercase tracking-widest bg-red-50 px-2 sm:px-2.5 py-1 rounded-full"
                         >
                           CLEAR
                         </button>
@@ -234,10 +234,10 @@ const WallCalendar = () => {
                     </div>
                   </div>
 
-                  {/* 42-Cell Grid */}
-                  <div className="grid grid-cols-7 gap-y-1 sm:gap-y-1.5 gap-x-0.5 sm:gap-x-1 w-full text-center">
+                  {/* 42-Cell Grid (Fluid Mobile Sizing) */}
+                  <div className="grid grid-cols-7 gap-y-1 sm:gap-y-1.5 gap-x-1 sm:gap-x-1 w-full text-center">
                     {['MON','TUE','WED','THU','FRI','SAT','SUN'].map(day => (
-                      <div key={day} className="text-[8px] sm:text-[9px] font-black tracking-widest text-stone-400 mb-1">{day}</div>
+                      <div key={day} className="text-[9px] sm:text-[10px] font-black tracking-widest text-stone-400 mb-1">{day}</div>
                     ))}
                     
                     {[...Array(startOffset)].map((_, i) => (
@@ -262,7 +262,7 @@ const WallCalendar = () => {
                                       realToday.getFullYear() === year;
 
                       return (
-                        <div key={day} className="relative group flex items-center justify-center aspect-square min-h-[28px] sm:min-h-[34px]">
+                        <div key={day} className="relative group flex items-center justify-center w-full aspect-square max-w-[32px] sm:max-w-[36px] mx-auto">
                           {inRange && <div className="absolute inset-0 bg-sky-100 z-0" />}
                           {isStart && endDate && <div className="absolute inset-y-0 right-0 w-1/2 bg-sky-100 z-0" />}
                           {isEnd && startDate && <div className="absolute inset-y-0 left-0 w-1/2 bg-sky-100 z-0" />}
@@ -271,7 +271,7 @@ const WallCalendar = () => {
                             onClick={() => handleDateClick(dateObj)}
                             onMouseEnter={() => setHoverDate(dateObj)}
                             className={`
-                              relative z-10 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-all
+                              relative z-10 w-full h-full rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-all
                               ${isToday && !isStart && !isEnd ? 'ring-2 ring-sky-300 ring-offset-1 text-sky-600 font-black' : ''}
                               ${isStart || isEnd ? 'bg-sky-500 text-white shadow-sm' : ''}
                               ${!isStart && !isEnd && inRange ? 'text-sky-700' : ''}
@@ -293,18 +293,18 @@ const WallCalendar = () => {
                   </div>
                 </div>
 
-                {/* RIGHT: Notes (Takes 40% of width) */}
+                {/* RIGHT: Notes (Safe height on mobile) */}
                 <div className="w-full md:w-[42%] flex flex-col border-t md:border-t-0 md:border-l border-stone-200 pt-3 md:pt-0 md:pl-5">
-                  <h3 className="text-[9px] sm:text-[10px] font-black text-stone-400 mb-2 uppercase tracking-widest flex items-center justify-between shrink-0">
+                  <h3 className="text-[10px] font-black text-stone-400 mb-2 uppercase tracking-widest flex items-center justify-between shrink-0">
                     <span>{monthName} MEMOS</span>
-                    <span className="text-sky-500 text-sm sm:text-base leading-none">✎</span>
+                    <span className="text-sky-500 text-sm leading-none">✎</span>
                   </h3>
                   
                   <textarea
                     value={monthlyNotes[monthKey] || ''}
                     onChange={handleNotesChange}
                     placeholder={`Notes for ${monthName}...`}
-                    className="flex-1 w-full resize-none outline-none text-[11px] sm:text-xs text-stone-700 bg-transparent min-h-[100px] md:min-h-full"
+                    className="flex-1 w-full resize-none outline-none text-[11px] sm:text-xs text-stone-700 bg-transparent h-[120px] md:h-full"
                     style={{
                       lineHeight: '1.75rem',
                       backgroundImage: 'linear-gradient(transparent, transparent calc(1.75rem - 1px), #e5e5e5 0px)',
@@ -321,7 +321,7 @@ const WallCalendar = () => {
               >
                 <button 
                   onClick={() => changeMonth(-1)} disabled={isAnimating}
-                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-md shadow-sm text-[9px] sm:text-[10px] font-black tracking-widest text-stone-500 hover:text-black hover:bg-stone-100 transition-all active:scale-95 disabled:opacity-50"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-md shadow-sm text-[10px] font-black tracking-widest text-stone-500 hover:text-black hover:bg-stone-100 transition-all active:scale-95 disabled:opacity-50"
                 >
                   &larr; PREV
                 </button>
@@ -334,7 +334,7 @@ const WallCalendar = () => {
 
                 <button 
                   onClick={() => changeMonth(1)} disabled={isAnimating}
-                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-md shadow-sm text-[9px] sm:text-[10px] font-black tracking-widest text-stone-500 hover:text-black hover:bg-stone-100 transition-all active:scale-95 disabled:opacity-50"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-md shadow-sm text-[10px] font-black tracking-widest text-stone-500 hover:text-black hover:bg-stone-100 transition-all active:scale-95 disabled:opacity-50"
                 >
                   NEXT &rarr;
                 </button>
