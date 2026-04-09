@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const WallCalendar = () => {
   // --- 1. STATE ---
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 1));
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [hoverDate, setHoverDate] = useState(null);
@@ -16,9 +16,12 @@ const WallCalendar = () => {
   const [direction, setDirection] = useState(1);
   const [isWindy, setIsWindy] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [realToday, setRealToday] = useState(null);
 
-  // --- 2. PERSISTENCE ---
+  // --- 2. PERSISTENCE & INIT ---
   useEffect(() => {
+    setRealToday(new Date()); // Safely get 'today' after mount to avoid Next.js hydration errors
+
     const savedNotes = localStorage.getItem('stack-calendar-notes');
     const savedMarks = localStorage.getItem('stack-marked-dates');
     
@@ -26,7 +29,6 @@ const WallCalendar = () => {
       try { setMonthlyNotes(JSON.parse(savedNotes)); } 
       catch (e) { localStorage.removeItem('stack-calendar-notes'); }
     }
-    
     if (savedMarks) {
       try { setMarkedDates(JSON.parse(savedMarks)); } 
       catch (e) { localStorage.removeItem('stack-marked-dates'); }
@@ -35,6 +37,14 @@ const WallCalendar = () => {
 
   const monthKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
 
+  // --- 3. HAPTIC FEEDBACK ENGINE ---
+  const triggerHaptic = (pattern = 50) => {
+    if (typeof window !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(pattern);
+    }
+  };
+
+  // --- 4. LOGIC & HANDLERS ---
   const handleNotesChange = (e) => {
     const updatedNotes = { ...monthlyNotes, [monthKey]: e.target.value };
     setMonthlyNotes(updatedNotes);
@@ -43,6 +53,7 @@ const WallCalendar = () => {
 
   const toggleMarkDate = () => {
     if (!startDate) return;
+    triggerHaptic(50);
     const timeKey = startDate.getTime();
     setMarkedDates(prev => {
       const newMarks = { ...prev };
@@ -53,12 +64,22 @@ const WallCalendar = () => {
     });
   };
 
-  // --- 3. LOGIC ---
   const changeMonth = (offset) => {
     if (isAnimating) return;
+    triggerHaptic(40);
     setIsAnimating(true);
     setDirection(offset);
     setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
+  };
+
+  // Swipe Gesture Handler
+  const handleDragEnd = (event, info) => {
+    const swipeThreshold = 50; // pixels
+    if (info.offset.x > swipeThreshold) {
+      changeMonth(-1); // Swiped right -> go back
+    } else if (info.offset.x < -swipeThreshold) {
+      changeMonth(1); // Swiped left -> go forward
+    }
   };
 
   const year = currentDate.getFullYear();
@@ -72,6 +93,7 @@ const WallCalendar = () => {
   const endPadding = 42 - (daysInMonth + startOffset); 
 
   const handleDateClick = (date) => {
+    triggerHaptic(30);
     if (!startDate || (startDate && endDate)) {
       setStartDate(date); setEndDate(null);
     } else if (date < startDate) {
@@ -102,7 +124,7 @@ const WallCalendar = () => {
     "https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?q=80&w=1000",
   ];
 
-  // --- 4. STACK PHYSICS ---
+  // --- 5. STACK PHYSICS ---
   const stackVariants = {
     enter: (dir) => ({ scale: 0.9, y: 30, opacity: 0, rotateZ: 0, zIndex: 0 }),
     center: { scale: 1, y: 0, opacity: 1, rotateZ: 0, zIndex: 10 },
@@ -137,7 +159,7 @@ const WallCalendar = () => {
           <p className="text-stone-400 text-[9px] sm:text-[9px] tracking-widest uppercase mt-0.5">Compact Engine</p>
         </div>
         <button 
-          onClick={() => setIsWindy(!isWindy)}
+          onClick={() => { triggerHaptic([30, 50]); setIsWindy(!isWindy); }}
           className={`px-4 py-2 sm:px-4 sm:py-2 rounded-full font-black text-[10px] tracking-wider shadow-sm transition-all active:scale-95 ${
             isWindy ? 'bg-sky-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'
           }`}
@@ -163,18 +185,26 @@ const WallCalendar = () => {
               exit="exit"
               transition={{ type: 'spring', stiffness: 280, damping: 22 }}
               onAnimationComplete={() => setIsAnimating(false)}
-              className="col-start-1 row-start-1 w-full bg-[#fdfbf7] rounded-xl sm:rounded-2xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.25)] overflow-hidden flex flex-col border border-stone-200"
+              
+              /* SWIPE GESTURES */
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.6}
+              onDragEnd={handleDragEnd}
+              whileDrag={{ scale: 0.98, cursor: 'grabbing' }}
+
+              className="col-start-1 row-start-1 w-full bg-[#fdfbf7] rounded-xl sm:rounded-2xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.25)] overflow-hidden flex flex-col border border-stone-200 cursor-grab active:cursor-grabbing"
             >
               
               {/* Wire Binding */}
-              <div className="relative h-4 sm:h-5 bg-zinc-900 flex justify-around items-center px-6 sm:px-10 z-20 shrink-0">
+              <div className="relative h-4 sm:h-5 bg-zinc-900 flex justify-around items-center px-6 sm:px-10 z-20 shrink-0 pointer-events-none">
                 {[...Array(14)].map((_, i) => (
                   <div key={i} className="w-1 sm:w-1.5 h-6 sm:h-8 bg-gradient-to-b from-zinc-300 to-zinc-600 rounded-full border border-black shadow-inner -mt-2" />
                 ))}
               </div>
 
-              {/* TOP: Image Banner (Optimized for Mobile Height) */}
-              <div className="relative w-full h-32 sm:h-40 bg-zinc-100 shrink-0">
+              {/* TOP: Image Banner */}
+              <div className="relative w-full h-32 sm:h-40 bg-zinc-100 shrink-0 pointer-events-none">
                 <img src={images[month]} alt={monthName} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 sm:p-5 text-white">
                   <span className="text-[11px] sm:text-xs font-medium tracking-[0.4em] opacity-80 mb-0.5">{year}</span>
@@ -182,8 +212,8 @@ const WallCalendar = () => {
                 </div>
               </div>
 
-              {/* MIDDLE: Content (Better Touch Padding for Mobile) */}
-              <div className="flex flex-col md:flex-row p-4 sm:p-5 gap-5 sm:gap-6 bg-white border-b border-stone-100 flex-1">
+              {/* MIDDLE: Content */}
+              <div className="flex flex-col md:flex-row p-4 sm:p-5 gap-5 sm:gap-6 bg-white border-b border-stone-100 flex-1 cursor-auto" onPointerDown={(e) => e.stopPropagation()}>
                 
                 {/* LEFT: Calendar Grid */}
                 <div className="w-full md:w-[55%] flex flex-col">
@@ -191,7 +221,7 @@ const WallCalendar = () => {
                   {/* Grid Controls */}
                   <div className="flex justify-between items-center mb-4 sm:mb-4 h-5 shrink-0">
                     <span className="text-[10px] font-bold text-stone-400 tracking-widest">DATE RANGE</span>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5 sm:gap-2">
                       {startDate && !endDate && (
                         <button 
                           onClick={toggleMarkDate} 
@@ -202,7 +232,7 @@ const WallCalendar = () => {
                       )}
                       {startDate && (
                         <button 
-                          onClick={() => { setStartDate(null); setEndDate(null); setHoverDate(null); }} 
+                          onClick={() => { triggerHaptic(20); setStartDate(null); setEndDate(null); setHoverDate(null); }} 
                           className="text-[9px] font-bold text-red-500 hover:text-red-700 uppercase tracking-widest bg-red-50 px-2.5 py-1 rounded-full"
                         >
                           CLEAR
@@ -232,6 +262,12 @@ const WallCalendar = () => {
                       const isEnd = endDate && timeKey === endDate.getTime();
                       const inRange = isDateInRange(dateObj);
                       const isMarked = markedDates[timeKey];
+                      
+                      // Identify Today's Date
+                      const isToday = realToday && 
+                                      realToday.getDate() === day && 
+                                      realToday.getMonth() === month && 
+                                      realToday.getFullYear() === year;
 
                       return (
                         <div key={day} className="relative group flex items-center justify-center aspect-square min-h-[30px] sm:min-h-[36px]">
@@ -243,7 +279,8 @@ const WallCalendar = () => {
                             onClick={() => handleDateClick(dateObj)}
                             onMouseEnter={() => setHoverDate(dateObj)}
                             className={`
-                              relative z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-bold transition-colors
+                              relative z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-bold transition-all
+                              ${isToday && !isStart && !isEnd ? 'ring-2 ring-sky-300 ring-offset-1 text-sky-600 font-black' : ''}
                               ${isStart || isEnd ? 'bg-sky-500 text-white shadow-sm' : ''}
                               ${!isStart && !isEnd && inRange ? 'text-sky-700' : ''}
                               ${!isStart && !isEnd && !inRange ? 'text-stone-700 hover:bg-stone-100' : ''}
@@ -286,7 +323,10 @@ const WallCalendar = () => {
               </div>
 
               {/* BOTTOM FOOTER: Navigation */}
-              <div className="flex justify-between items-center w-full p-3 sm:p-3 sm:px-6 bg-stone-50 shrink-0">
+              <div 
+                className="flex justify-between items-center w-full p-3 sm:p-3 sm:px-6 bg-stone-50 shrink-0 cursor-auto"
+                onPointerDown={(e) => e.stopPropagation()} // Prevents dragging when clicking buttons
+              >
                 <button 
                   onClick={() => changeMonth(-1)} disabled={isAnimating}
                   className="px-4 py-2 sm:px-4 sm:py-2 bg-white rounded-md shadow-sm text-[10px] font-black tracking-widest text-stone-500 hover:text-black hover:bg-stone-100 transition-all active:scale-95 disabled:opacity-50"
