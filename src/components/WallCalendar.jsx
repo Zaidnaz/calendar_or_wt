@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const WallCalendar = () => {
   // --- 1. STATE ---
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 1)); 
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [hoverDate, setHoverDate] = useState(null);
@@ -20,7 +20,7 @@ const WallCalendar = () => {
 
   // --- 2. PERSISTENCE & INIT ---
   useEffect(() => {
-    setRealToday(new Date()); // Safely get 'today' after mount to avoid Next.js hydration errors
+    setRealToday(new Date()); 
 
     const savedNotes = localStorage.getItem('stack-calendar-notes');
     const savedMarks = localStorage.getItem('stack-marked-dates');
@@ -37,7 +37,7 @@ const WallCalendar = () => {
 
   const monthKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
 
-  // --- 3. HAPTIC FEEDBACK ENGINE ---
+  // --- 3. HAPTIC FEEDBACK ---
   const triggerHaptic = (pattern = 50) => {
     if (typeof window !== 'undefined' && navigator.vibrate) {
       navigator.vibrate(pattern);
@@ -72,21 +72,17 @@ const WallCalendar = () => {
     setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
   };
 
-  // Swipe Gesture Handler
   const handleDragEnd = (event, info) => {
-    const swipeThreshold = 50; // pixels
-    if (info.offset.x > swipeThreshold) {
-      changeMonth(-1); // Swiped right -> go back
-    } else if (info.offset.x < -swipeThreshold) {
-      changeMonth(1); // Swiped left -> go forward
-    }
+    const swipeThreshold = 50; 
+    if (info.offset.x > swipeThreshold) changeMonth(-1); 
+    else if (info.offset.x < -swipeThreshold) changeMonth(1); 
   };
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const monthName = currentDate.toLocaleString('default', { month: 'long' }).toUpperCase();
   
-  // Constant Size Math
+  // Constant Size Math (42 cells)
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const prevMonthDays = new Date(year, month, 0).getDate();
   const startOffset = (new Date(year, month, 1).getDay() + 6) % 7; 
@@ -138,7 +134,7 @@ const WallCalendar = () => {
   };
 
   return (
-    <div className="min-h-screen bg-stone-200 p-3 sm:p-4 font-sans flex flex-col items-center justify-center overflow-hidden">
+    <div className="min-h-screen bg-stone-200 p-2 sm:p-6 font-sans flex flex-col items-center justify-center overflow-hidden">
       
       <style>{`
         @keyframes natural-breeze {
@@ -152,15 +148,15 @@ const WallCalendar = () => {
         }
       `}</style>
 
-      {/* DASHBOARD */}
-      <div className="w-full max-w-4xl flex justify-between items-center mb-4 sm:mb-4 px-1 sm:px-2 z-50">
+      {/* DASHBOARD - Strictly max-w-3xl (768px) to prevent being "too wide" */}
+      <div className="w-full max-w-3xl flex justify-between items-center mb-3 sm:mb-4 px-1 sm:px-2 z-50">
         <div>
-          <h2 className="text-stone-500 font-black tracking-[0.2em] text-[11px] sm:text-xs">SMART STACK CALENDAR</h2>
-          <p className="text-stone-400 text-[9px] sm:text-[9px] tracking-widest uppercase mt-0.5">Compact Engine</p>
+          <h2 className="text-stone-500 font-black tracking-[0.2em] text-[10px] sm:text-xs">SMART STACK CALENDAR</h2>
+          <p className="text-stone-400 text-[8px] sm:text-[9px] tracking-widest uppercase mt-0.5">Interactive Engine</p>
         </div>
         <button 
           onClick={() => { triggerHaptic([30, 50]); setIsWindy(!isWindy); }}
-          className={`px-4 py-2 sm:px-4 sm:py-2 rounded-full font-black text-[10px] tracking-wider shadow-sm transition-all active:scale-95 ${
+          className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-black text-[9px] sm:text-[10px] tracking-wider shadow-sm transition-all active:scale-95 ${
             isWindy ? 'bg-sky-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'
           }`}
         >
@@ -168,9 +164,9 @@ const WallCalendar = () => {
         </button>
       </div>
 
-      {/* 3D WRAPPER */}
+      {/* 3D WRAPPER - Strictly max-w-3xl */}
       <div 
-        className={`w-full max-w-4xl relative ${isWindy ? 'wind-active' : ''}`} 
+        className={`w-full max-w-3xl relative ${isWindy ? 'wind-active' : ''}`} 
         style={{ perspective: '2000px', transformStyle: 'preserve-3d', transformOrigin: 'top center' }}
       >
         <div className="grid w-full relative">
@@ -185,47 +181,44 @@ const WallCalendar = () => {
               exit="exit"
               transition={{ type: 'spring', stiffness: 280, damping: 22 }}
               onAnimationComplete={() => setIsAnimating(false)}
-              
-              /* SWIPE GESTURES */
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.6}
               onDragEnd={handleDragEnd}
               whileDrag={{ scale: 0.98, cursor: 'grabbing' }}
-
               className="col-start-1 row-start-1 w-full bg-[#fdfbf7] rounded-xl sm:rounded-2xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.25)] overflow-hidden flex flex-col border border-stone-200 cursor-grab active:cursor-grabbing"
             >
               
-              {/* Wire Binding */}
-              <div className="relative h-4 sm:h-5 bg-zinc-900 flex justify-around items-center px-6 sm:px-10 z-20 shrink-0 pointer-events-none">
+              {/* Wire Binding - Scaled down for 3xl width */}
+              <div className="relative h-4 sm:h-5 bg-zinc-900 flex justify-around items-center px-4 sm:px-8 z-20 shrink-0 pointer-events-none">
                 {[...Array(14)].map((_, i) => (
-                  <div key={i} className="w-1 sm:w-1.5 h-6 sm:h-8 bg-gradient-to-b from-zinc-300 to-zinc-600 rounded-full border border-black shadow-inner -mt-2" />
+                  <div key={i} className="w-1 sm:w-1.5 h-6 sm:h-8 bg-gradient-to-b from-zinc-300 to-zinc-600 rounded-full border border-black shadow-inner -mt-2 sm:-mt-3" />
                 ))}
               </div>
 
-              {/* TOP: Image Banner */}
+              {/* TOP: Image Banner - Perfect proportionate height (sm:h-40) */}
               <div className="relative w-full h-32 sm:h-40 bg-zinc-100 shrink-0 pointer-events-none">
                 <img src={images[month]} alt={monthName} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 sm:p-5 text-white">
-                  <span className="text-[11px] sm:text-xs font-medium tracking-[0.4em] opacity-80 mb-0.5">{year}</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-5 text-white">
+                  <span className="text-[10px] sm:text-xs font-medium tracking-[0.4em] opacity-80 mb-0.5">{year}</span>
                   <h1 className="text-3xl sm:text-4xl font-black tracking-tighter">{monthName}</h1>
                 </div>
               </div>
 
-              {/* MIDDLE: Content */}
-              <div className="flex flex-col md:flex-row p-4 sm:p-5 gap-5 sm:gap-6 bg-white border-b border-stone-100 flex-1 cursor-auto" onPointerDown={(e) => e.stopPropagation()}>
+              {/* MIDDLE: Content - Balanced 60/40 Split */}
+              <div className="flex flex-col md:flex-row p-3 sm:p-5 gap-4 sm:gap-6 bg-white border-b border-stone-100 flex-1 cursor-auto" onPointerDown={(e) => e.stopPropagation()}>
                 
-                {/* LEFT: Calendar Grid */}
-                <div className="w-full md:w-[55%] flex flex-col">
+                {/* LEFT: Calendar Grid (Takes 60% of width) */}
+                <div className="w-full md:w-[58%] flex flex-col">
                   
                   {/* Grid Controls */}
-                  <div className="flex justify-between items-center mb-4 sm:mb-4 h-5 shrink-0">
-                    <span className="text-[10px] font-bold text-stone-400 tracking-widest">DATE RANGE</span>
+                  <div className="flex justify-between items-center mb-3 sm:mb-4 h-5 shrink-0">
+                    <span className="text-[9px] sm:text-[10px] font-bold text-stone-400 tracking-widest">DATE RANGE</span>
                     <div className="flex gap-1.5 sm:gap-2">
                       {startDate && !endDate && (
                         <button 
                           onClick={toggleMarkDate} 
-                          className="text-[9px] font-bold text-sky-500 hover:text-sky-700 uppercase tracking-widest bg-sky-50 px-2.5 py-1 rounded-full flex items-center gap-1"
+                          className="text-[8px] sm:text-[9px] font-bold text-sky-500 hover:text-sky-700 uppercase tracking-widest bg-sky-50 px-2 sm:px-2.5 py-1 rounded-full flex items-center gap-1"
                         >
                           {markedDates[startDate.getTime()] ? '★ UNMARK' : '☆ MARK'}
                         </button>
@@ -233,7 +226,7 @@ const WallCalendar = () => {
                       {startDate && (
                         <button 
                           onClick={() => { triggerHaptic(20); setStartDate(null); setEndDate(null); setHoverDate(null); }} 
-                          className="text-[9px] font-bold text-red-500 hover:text-red-700 uppercase tracking-widest bg-red-50 px-2.5 py-1 rounded-full"
+                          className="text-[8px] sm:text-[9px] font-bold text-red-500 hover:text-red-700 uppercase tracking-widest bg-red-50 px-2 sm:px-2.5 py-1 rounded-full"
                         >
                           CLEAR
                         </button>
@@ -241,14 +234,14 @@ const WallCalendar = () => {
                     </div>
                   </div>
 
-                  {/* Compact 42-Cell Grid */}
-                  <div className="grid grid-cols-7 gap-y-1.5 sm:gap-y-1.5 gap-x-1 sm:gap-x-1 w-full text-center">
+                  {/* 42-Cell Grid */}
+                  <div className="grid grid-cols-7 gap-y-1 sm:gap-y-1.5 gap-x-0.5 sm:gap-x-1 w-full text-center">
                     {['MON','TUE','WED','THU','FRI','SAT','SUN'].map(day => (
-                      <div key={day} className="text-[9px] sm:text-[9px] font-black tracking-widest text-stone-400 mb-1">{day}</div>
+                      <div key={day} className="text-[8px] sm:text-[9px] font-black tracking-widest text-stone-400 mb-1">{day}</div>
                     ))}
                     
                     {[...Array(startOffset)].map((_, i) => (
-                      <div key={`prev-${i}`} className="flex items-center justify-center p-1 text-stone-300 text-[11px] sm:text-xs">
+                      <div key={`prev-${i}`} className="flex items-center justify-center p-1 text-stone-300 text-[10px] sm:text-[11px]">
                         {prevMonthDays - startOffset + i + 1}
                       </div>
                     ))}
@@ -263,14 +256,13 @@ const WallCalendar = () => {
                       const inRange = isDateInRange(dateObj);
                       const isMarked = markedDates[timeKey];
                       
-                      // Identify Today's Date
                       const isToday = realToday && 
                                       realToday.getDate() === day && 
                                       realToday.getMonth() === month && 
                                       realToday.getFullYear() === year;
 
                       return (
-                        <div key={day} className="relative group flex items-center justify-center aspect-square min-h-[30px] sm:min-h-[36px]">
+                        <div key={day} className="relative group flex items-center justify-center aspect-square min-h-[28px] sm:min-h-[34px]">
                           {inRange && <div className="absolute inset-0 bg-sky-100 z-0" />}
                           {isStart && endDate && <div className="absolute inset-y-0 right-0 w-1/2 bg-sky-100 z-0" />}
                           {isEnd && startDate && <div className="absolute inset-y-0 left-0 w-1/2 bg-sky-100 z-0" />}
@@ -279,7 +271,7 @@ const WallCalendar = () => {
                             onClick={() => handleDateClick(dateObj)}
                             onMouseEnter={() => setHoverDate(dateObj)}
                             className={`
-                              relative z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-bold transition-all
+                              relative z-10 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-all
                               ${isToday && !isStart && !isEnd ? 'ring-2 ring-sky-300 ring-offset-1 text-sky-600 font-black' : ''}
                               ${isStart || isEnd ? 'bg-sky-500 text-white shadow-sm' : ''}
                               ${!isStart && !isEnd && inRange ? 'text-sky-700' : ''}
@@ -294,25 +286,25 @@ const WallCalendar = () => {
                     })}
 
                     {[...Array(endPadding)].map((_, i) => (
-                      <div key={`next-${i}`} className="flex items-center justify-center p-1 text-stone-300 text-[11px] sm:text-xs">
+                      <div key={`next-${i}`} className="flex items-center justify-center p-1 text-stone-300 text-[10px] sm:text-[11px]">
                         {i + 1}
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* RIGHT: Compact Notes */}
-                <div className="w-full md:w-[45%] flex flex-col border-t md:border-t-0 md:border-l border-stone-200 pt-4 md:pt-0 md:pl-6">
-                  <h3 className="text-[10px] font-black text-stone-400 mb-2 uppercase tracking-widest flex items-center justify-between shrink-0">
+                {/* RIGHT: Notes (Takes 40% of width) */}
+                <div className="w-full md:w-[42%] flex flex-col border-t md:border-t-0 md:border-l border-stone-200 pt-3 md:pt-0 md:pl-5">
+                  <h3 className="text-[9px] sm:text-[10px] font-black text-stone-400 mb-2 uppercase tracking-widest flex items-center justify-between shrink-0">
                     <span>{monthName} MEMOS</span>
-                    <span className="text-sky-500 text-sm leading-none">✎</span>
+                    <span className="text-sky-500 text-sm sm:text-base leading-none">✎</span>
                   </h3>
                   
                   <textarea
                     value={monthlyNotes[monthKey] || ''}
                     onChange={handleNotesChange}
                     placeholder={`Notes for ${monthName}...`}
-                    className="flex-1 w-full resize-none outline-none text-xs text-stone-700 bg-transparent min-h-[100px] sm:min-h-[140px] md:min-h-full"
+                    className="flex-1 w-full resize-none outline-none text-[11px] sm:text-xs text-stone-700 bg-transparent min-h-[100px] md:min-h-full"
                     style={{
                       lineHeight: '1.75rem',
                       backgroundImage: 'linear-gradient(transparent, transparent calc(1.75rem - 1px), #e5e5e5 0px)',
@@ -324,25 +316,25 @@ const WallCalendar = () => {
 
               {/* BOTTOM FOOTER: Navigation */}
               <div 
-                className="flex justify-between items-center w-full p-3 sm:p-3 sm:px-6 bg-stone-50 shrink-0 cursor-auto"
-                onPointerDown={(e) => e.stopPropagation()} // Prevents dragging when clicking buttons
+                className="flex justify-between items-center w-full p-2 sm:p-3 sm:px-5 bg-stone-50 shrink-0 cursor-auto border-t border-stone-100"
+                onPointerDown={(e) => e.stopPropagation()} 
               >
                 <button 
                   onClick={() => changeMonth(-1)} disabled={isAnimating}
-                  className="px-4 py-2 sm:px-4 sm:py-2 bg-white rounded-md shadow-sm text-[10px] font-black tracking-widest text-stone-500 hover:text-black hover:bg-stone-100 transition-all active:scale-95 disabled:opacity-50"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-md shadow-sm text-[9px] sm:text-[10px] font-black tracking-widest text-stone-500 hover:text-black hover:bg-stone-100 transition-all active:scale-95 disabled:opacity-50"
                 >
                   &larr; PREV
                 </button>
                 
                 <div className="flex gap-1.5 opacity-40">
-                  <div className="w-1 h-1 rounded-full bg-stone-400"></div>
-                  <div className="w-1 h-1 rounded-full bg-stone-400"></div>
-                  <div className="w-1 h-1 rounded-full bg-stone-400"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-stone-400"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-stone-400"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-stone-400"></div>
                 </div>
 
                 <button 
                   onClick={() => changeMonth(1)} disabled={isAnimating}
-                  className="px-4 py-2 sm:px-4 sm:py-2 bg-white rounded-md shadow-sm text-[10px] font-black tracking-widest text-stone-500 hover:text-black hover:bg-stone-100 transition-all active:scale-95 disabled:opacity-50"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-md shadow-sm text-[9px] sm:text-[10px] font-black tracking-widest text-stone-500 hover:text-black hover:bg-stone-100 transition-all active:scale-95 disabled:opacity-50"
                 >
                   NEXT &rarr;
                 </button>
